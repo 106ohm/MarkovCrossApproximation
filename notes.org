@@ -1,0 +1,24 @@
+* Approximate the solution of a system of PDEs, also called vector-valued PDE, with chebfun
+We want to find the sulution bundle u(x,y) of the system of PDEs
+du(x,y)/dx = Q(y)*u(x,y),
+u(0,y) = pi0.
+This system originates from the Kolmogorov Forward Equation (a system of ODEs)
+dpi_p(t)/dt = Q_p*pi_p(t),
+where the only independent variable is t, and p is a vector of constants jet to be
+defined, i.e., parameters, that can be used to label the solutions.
+If p is upgraded to the independent variable status, i.e., when we 
+are looking for the solution bundle pi(t,p), renaming  
+x:=t, y:=p and u:=u, we obtain the system of PDEs described at the beginning.
+
+** chebop
+With chebop we can address the Kolmogorov Forward Equation, where p are constants,
+because the problem is stated as the approximation of the solution of a
+system of linear ODEs.
+We can address u as a vector, the problem is that we cannot address p as 
+a vector of independent variables.
+
+** chebop2
+With chebop2 we can address a single additional independent variable, 
+i.e., y plays the role of p, and this is quite restrictive by itself,
+but the real issue is that we cannot address u as a vector.
+
