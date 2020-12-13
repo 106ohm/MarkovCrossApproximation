@@ -1,0 +1,102 @@
+\documentclass[]{article}
+
+%opening
+\title{Chebyshev Approximation based Solution\\of Markov Dependability Models}
+\author{}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{bbm}
+\usepackage{cleveref}
+\usepackage{url}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\section{Problem statement}
+We want to find the solution bundle $\pi(t,\theta)$ of the system of PDEs
+\begin{equation}
+\label{eq:PDEs}
+\begin{cases}
+\frac{\partial\pi(t,\theta)}{\partial t} &= Q(\theta)\pi(t,\theta),\\
+\pi(0,\theta) &= \pi_0,
+\end{cases}
+\end{equation}
+where $\pi_0\in\mathbb R^N$, $\theta\in\mathbb R^p$, 
+$Q(\theta)\in\mathbb R^{N\times N}$, $t\in[0,t_f]$, and 
+$\theta_i\in [l_i,u_i]$.
+This system originates from the Kolmogorov Forward Equation (a system of ODEs)
+$d\pi_{\theta}(t)/dt = Q_{\theta}\pi_{\theta}(t)$,
+where the only independent variable is $t$, and $\theta$ is a vector of constants 
+jet to be defined, i.e., parameters, that can be used to label the solutions.
+If $\theta$ is upgraded to the independent variable status, i.e., when we 
+are looking for the solution bundle $\pi(t,p)$, 
+we obtain the system of PDEs defined in \Cref{eq:PDEs}.
+
+\section{Observations}
+First trial: exploit Chebfun\footnote{\url{https://www.chebfun.org}}.
+In particular \texttt{chebop} and \texttt{chebop2}.
+With \texttt{chebop} we can address the Kolmogorov Forward Equation, where $\theta$ 
+are constants, because the problem is stated as the approximation of the 
+solution of a system of linear ODEs.
+We can address $\pi_{\theta}$ as a vector, the problem is that we cannot 
+address $\theta$ as a vector of independent variables.
+
+With \texttt{chebop2} we can address a single additional independent variable, 
+i.e., $\theta\in\mathbb R$, and this is quite restrictive by itself,
+but the real issue is that we cannot address $\pi$ as a vector.
+
+\section{Approximation ``by hand''}
+First consider the Kolmogorov Forward equations (system pf ODEs), i.e.,
+$\theta$ is a constant, and actually we can avoid mentioning it.
+Calling $T_j$ the $j$-th Chebyshev polynomials, we can define
+\begin{equation}
+\label{eq:hatpi1d}
+\hat{\pi}_i(t) = \sum_{j=1}^n X_{ij}T_j(\varphi(t)),
+\end{equation}
+where $\varphi$ sends $[0,t_f]$ to $[-1,1]$, and $X\in\mathbb R^{N,n}$ is the
+unknown matrix.
+Observing that the $a_h$ in $T_j'=\sum_{h=0}^{j-1}a_hT_h$ are well-known constants,
+defining $A_{jh}=\mathbbm{1}_{\{h<j\}}a_h$ so that $A$ is triangular, we can write
+\[
+\forall i. \sum_{j,h}X_{ij}A_{jh}\varphi'(t)T_h(\varphi(t))
+-\sum_{l,j}Q_{il}X_{lj}T_j(\varphi(t))\approx 0\in\mathbb R,
+\] 
+i.e., $\forall i.X_iADT-Q_iXT\approx 0$, calling $X_i$ the $i$-th row of $X$,
+$T\mathbb R^{n}$ the vector whose entries are $T_j(\varphi(t_h))$,
+$t_h$ the node points, and $D$ is the diagonal matrix whose entries are
+equal to $\varphi'(t_h)$. 
+Then $(XDA-QX)T\approx 0\in\mathbb R^N$, that resemble a Sylvester equation. 
+
+Notice that\footnote{\url{https://arxiv.org/pdf/1409.2789.pdf}} 
+in \texttt{chebop}, instead of writing $T'_j$ in terms of Chebyshev polynomial, 
+the ultraspherical polynomials are employed, so that leading to a sparse matrix
+instead of a triangolar one, but for now we want to simplify things as much as possible.
+
+In \texttt{chebop2} a discretization of a separable representation of the
+differential operator is considered. Here instead we have to deal just with a
+1D partial derivative, and in addition the right hand side of the PDE has
+a simple shape. Thus, we want to do computation ``by hand''.
+Define the approximation to the solution bundle as
+\begin{equation}
+\label{eq:hatpi}
+\hat{\pi}_i(t) = \sum_{j,k_1,\dots,k_p=1}^n 
+X_{ijk_1\dots k_p}T_j(\varphi(t))
+T_{k_1}(\psi_i(\theta_1))\cdot T_{k_p}(\psi_p(\theta_p)),
+\end{equation}
+where $\psi_i$ sends $[l_i,u_i]$ to $[-1,1]$. We have
+\begin{align*}
+\forall i. &\sum_{j,h,,k_1,\dots,k_p}X_{ij}A_{jh}\varphi'(t)T_h(\varphi(t))
+T_{k_1}(\psi_i(\theta_1))\cdot T_{k_p}(\psi_p(\theta_p))+\\
+-&\sum_{l,j,,k_1,\dots,k_p}Q_{il}X_{lj}T_j(\varphi(t))T_{k_1}(\psi_i(\theta_1))\cdot T_{k_p}(\psi_p(\theta_p))
+\approx 0\in\mathbb R,
+\end{align*}
+but this time things are not-so-nice as before.
+
+
+\end{document}
