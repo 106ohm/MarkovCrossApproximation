@@ -5,8 +5,11 @@ plow = 0.5;
 pup = 1.5;
 
 lambda = [0.75, 1.25];
+
+t = linspace(0, tf, 100);
+
 % pi is a matrix whose rows are pi(t_i) for t_i in [0,tf]
-pi = KolmogorovODE(Q(lambda),pi0,tf);
+pi = KolmogorovODE(Q(lambda), pi0, t);
 
 %U = ChebopMarkovOneParameter(@Q,pi0,tf,plow,pup);
 
