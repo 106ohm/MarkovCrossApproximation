@@ -10,7 +10,7 @@ U = zeros(m, 0);
 V = zeros(m, 0);
 
 for j = 1 : 6
-    pivot = row(colindex);    
+    pivot = row(colindex);
     col = Acol(colindex) - U * V(colindex, :)';
     
     fprintf('Pivot (%d, %d): %e\n', rowindex, colindex, pivot);
