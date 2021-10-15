@@ -8,7 +8,7 @@ function U = aca_nd(n, Afiber, tol)
 %
 % A = U1(:,1) x ... x Ud(:,1) + ... + U1(:,k) x ... x Ud(:,k)
 
-strategy = 'fiber';
+strategy = 'random';
 
 d = length(n);
 U = cell(1, d);

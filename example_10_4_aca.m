@@ -19,10 +19,10 @@ T = cpd2full(U);
 
 % To check:
 %
-% pi10 = KolmogorovODE(Q_10_4([ lambda1(40), lambda2(60) ]), pi0, t);
-% plot(t, 1-pi0(:,4), 'k*');
-% hold on;
-% plot(t, T(:,40,60));
+pi10 = KolmogorovODE(Q_10_4([ lambda1(40), lambda2(60) ]), pi0, t);
+plot(t, 1-pi10(:,4), 'k*');
+hold on;
+plot(t, T(:,40,60));
 
 function out = Q(y)
 out = [-1-1e-3       1  1e-3    0

@@ -9,6 +9,7 @@
 \usepackage{bbm}
 \usepackage{cleveref}
 \usepackage{url}
+\usepackage{color}
 
 \begin{document}
 
@@ -99,6 +100,76 @@ T_{k_1}(\psi_i(\theta_1))\cdot T_{k_p}(\psi_p(\theta_p))+\\
 \approx 0\in\mathbb R,
 \end{align*}
 but this time things are not-so-nice as before.
+
+
+\section{Adaptive cross approximation}
+
+We consider the problem of approximating the smooth functions 
+\[
+    m(t, \theta_1, \ldots, \theta_p) = 
+      \langle 
+        \pi(t, \theta_1, \ldots, \theta_p), 
+        r
+       \rangle,
+\]
+where $r \in \mathbb R^n$ is a non-negative vector, 
+and $\pi(t, \theta_1, \ldots, \theta_p)$ is
+a row vector defined by 
+the Kolmogorov differential equation
+\[
+    \begin{cases}
+        \dot{\pi}(t, \theta_1, \ldots, \theta_p) = \pi(t, \theta_1, \ldots, \theta_p) Q(\theta_1, \ldots, \theta_p) \\ 
+        \pi(0, \theta_1, \ldots, \theta_p) = \pi_0. 
+    \end{cases}
+\]
+The function 
+$m(t, \theta)$ is a parameter--dependent measure associated with
+the continuous time
+Markov chain with infinitesimal generator 
+$Q(\theta_1, \ldots, \theta_p)$. Our aim is 
+retrieving a uniformly accurate representation of 
+$m(t, \theta_1, \ldots, \theta_p)$ without explicitly 
+evaluating $\pi(\cdot)$ at all points 
+of a lattice discretizing the time and the parameter space. 
+Indeed, given discretization of the time $t$ and parameters 
+$\theta_1, \ldots, \theta_p$ with $n_0, \ldots, n_p$ 
+nodes, evaluating all the possible 
+values of $\pi$ would lead to an asymptotic cost 
+$\mathcal O(n_1 \ldots n_{p+1})$. 
+
+\subsection{The case $p = 1$}
+
+It is instructive to start form the easiest case, where only 
+one parameter $\theta_1$ is used in the model. Suppose to 
+consider discretizations of $t$ and $\theta$ 
+as follows:
+\[
+    t^{(1)} < \ldots < t^{(n_0)}, \qquad 
+    \theta_1^{(1)} < \ldots < \theta_1^{(n_1)}. 
+\]
+The matrix defined by $X_{ij} = m(t^{(i)}, \theta_1^{(j)})$ is of 
+size $n_0 \times n_1$. If the discretizations above are 
+appropriately chosen, we expect to be able to recover the 
+value of $m(t, \theta_1)$ at any point by interpolating it 
+over the nodes (for instance using spline interpolation --- we shall 
+discuss the most appropriate method for choosing the points for 
+$t$ and $\theta_1$ later). 
+
+We now make the following observation: if 
+$Q(\theta_1)$ is smooth over $[\theta_1^{(\min)}, \theta_1^{(\max)}]$
+then the same holds for $e^{tQ(\theta_1)}$ for any 
+$\theta_1$. Therefore, we can express the measure 
+$m(t, \theta_1)$ as 
+\[
+    m(t, \theta_1) = \langle r, \pi(t) \rangle = 
+      \langle r, \pi_0 e^{tQ(\theta_1)} \rangle. 
+\]
+{ \color{red} Low-rank justification here }
+
+We now consider an approach first proposed by Bebendorf 
+in \cite{bebendorf}, and that has recently been employed in 
+the successful \texttt{chebfun2} package. 
+
 
 
 \end{document}
