@@ -167,8 +167,65 @@ $m(t, \theta_1)$ as
 { \color{red} Low-rank justification here }
 
 We now consider an approach first proposed by Bebendorf 
-in \cite{bebendorf}, and that has recently been employed in 
-the successful \texttt{chebfun2} package. 
+in \cite{bebendorf2003adaptive}, and that has recently been employed in 
+the successful \texttt{chebfun2} package. The idea is 
+to approximate a bivariate function $m(t, \theta)$ with a 
+sum of separable approximations
+\[
+    m(t, \theta) \approx 
+      g_1(t) h_1(\theta) + g_2(t) h_2(\theta) + \ldots 
+      + g_k(t) h_k(\theta). 
+\]
+If evaluated at the chosen nodes $t^{(i)}$ and 
+$\theta_1^{(j)}$, this approximation yields a matrix 
+of rank at most $k$, which can be stored efficiently, and 
+whose entries (i.e., the evaluations of $m(t,\theta)$ at the 
+points in the 2D lattice) are computable in $\mathcal O(k)$ 
+operations. 
+
+The approximation of the matrix with the  evaluation of the  
+at the nodes is equivalent to a low-rank approximation 
+problem. The evaluation of the above decompositions 
+can be obtained performing the following 
+steps:
+\begin{enumerate}
+    \item Find the element of maximum modulus  $X_{\hat i, \hat j}$
+      in the matrix 
+      $X_{ij}$, with the evaluations 
+      $m(t^{(i)}, \theta_1^{(j)})$. 
+    \item Choose as $Y_1$ as the following rank $1$ matrix,
+      \[
+          Y_1 := \frac{1}{X_{\hat i \hat j}} 
+            (X e_{\hat i}) (e_{\hat j}^T X).
+      \]
+      and set $X_1 = X - Y_1$. 
+    \item Go back to point $1.$ replacing $X$ with $X_1$, and repeat 
+      the procedure for $k$ steps. The computed $Y_1$ at the following 
+      steps are labeled as $Y_j$ for $j = 2, \ldots, k$. 
+\end{enumerate}
+
+At the end of the above algorithms, one obtains a decomposition 
+\[
+    X = Y_1 + \ldots + Y_k + R_k, 
+\]
+where $R_k$ is some residual, and $Y_i$ are rank $1$ matrices. The 
+residual $R_k$ can be linked with the tail of a partial LU decomposition 
+with full pivoting, and in case $X$ is approximately of rank $k$, 
+it can be guaranteed to be small \cite{bebendorf2003adaptive,townsend2013extension}. 
+
+In practice, the task in point 1\. can be rather challenging: determining the
+maximum modulus entry in $X$ without looking at $\mathcal O(n_0 n_1)$ 
+elements is impossible in general. However, if one 
+accepts to find the maximum modulus element on the current row 
+or column, the method can be linked with the LU factorization 
+with partial pivoting, guaranteeing similar accuracy 
+in the average case, but with a linear cost in the dimension \cite{bebendorf2003adaptive}. 
+
+We shall discuss in detail how we deal with
+point 1. in Section~\ref{sec:pivot-choice}. 
+
+\bibliographystyle{plain}
+\bibliography{biblio}
 
 
 
