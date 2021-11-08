@@ -90,13 +90,13 @@ Define the approximation to the solution bundle as
 \label{eq:hatpi}
 \hat{\pi}_i(t) = \sum_{j,k_1,\dots,k_p=1}^n 
 X_{ijk_1\dots k_p}T_j(\varphi(t))
-T_{k_1}(\psi_i(\theta_1))\cdot T_{k_p}(\psi_p(\theta_p)),
+T_{k_1}(\psi_i(\theta_1))\cdots T_{k_p}(\psi_p(\theta_p)),
 \end{equation}
 where $\psi_i$ sends $[l_i,u_i]$ to $[-1,1]$. We have
 \begin{align*}
 \forall i. &\sum_{j,h,,k_1,\dots,k_p}X_{ij}A_{jh}\varphi'(t)T_h(\varphi(t))
-T_{k_1}(\psi_i(\theta_1))\cdot T_{k_p}(\psi_p(\theta_p))+\\
--&\sum_{l,j,,k_1,\dots,k_p}Q_{il}X_{lj}T_j(\varphi(t))T_{k_1}(\psi_i(\theta_1))\cdot T_{k_p}(\psi_p(\theta_p))
+T_{k_1}(\psi_i(\theta_1))\cdots T_{k_p}(\psi_p(\theta_p))+\\
+-&\sum_{l,j,,k_1,\dots,k_p}Q_{il}X_{lj}T_j(\varphi(t))T_{k_1}(\psi_i(\theta_1))\cdots T_{k_p}(\psi_p(\theta_p))
 \approx 0\in\mathbb R,
 \end{align*}
 but this time things are not-so-nice as before.
@@ -123,7 +123,7 @@ the Kolmogorov differential equation
     \end{cases}
 \]
 The function 
-$m(t, \theta)$ is a parameter--dependent measure associated with
+$m(t, \theta)$ is a parameter--dependent instantaneous measure associated with
 the continuous time
 Markov chain with infinitesimal generator 
 $Q(\theta_1, \ldots, \theta_p)$. Our aim is 
@@ -136,6 +136,23 @@ $\theta_1, \ldots, \theta_p$ with $n_0, \ldots, n_p$
 nodes, evaluating all the possible 
 values of $\pi$ would lead to an asymptotic cost 
 $\mathcal O(n_1 \ldots n_{p+1})$. 
+
+Of course, we are also interested in accumulated measures
+\[
+m(t, \theta_1, \ldots, \theta_p) = 
+\langle 
+b(t, \theta_1, \ldots, \theta_p), 
+r
+\rangle,
+\]
+where $b$ solves
+\[
+\begin{cases}
+\dot{b}(t, \theta_1, \ldots, \theta_p) = b(t, \theta_1, \ldots, \theta_p) Q(\theta_1, \ldots, \theta_p) + \pi_0\\ 
+\pi(0, \theta_1, \ldots, \theta_p) = 0. 
+\end{cases}
+\]
+Actually, $b_i(t, \theta_1, \ldots, \theta_p)=\int_0^t \pi_i(t, \theta_1, \ldots, \theta_p) dt$.
 
 \subsection{The case $p = 1$}
 
