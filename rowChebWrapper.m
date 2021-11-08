@@ -1,4 +1,4 @@
-function row = rowChebWrapper(f, t, pts)
+function row = rowChebWrapper(f, pts)
 %
 
 n = 15;
@@ -9,7 +9,7 @@ x = chebpts(n, [a, b]);
 fx = x;
 
 for j = 1 : length(x)
-    fx(j) = f(t, x(j));
+    fx(j) = f(x(j));
 end
 
 res = inf;
@@ -23,7 +23,7 @@ while res > eps * length(x)
     nfx(2:2:end) = fx(2:end-1);
     fx = [fx(1) ; nfx ; fx(end)];
     for j = 2 : 2 : length(x)
-        fx(j) = f(t, x(j));
+        fx(j) = f(x(j));
     end
     
     sz = length(fx) - 1;

@@ -32,9 +32,22 @@ for s = 1 : maxit
     
     fprintf('Step %d, |pivot| = %e\n', s, abs(pivot));
     
-    if abs(pivot) <= tol
-        return;
-    end
+%     if abs(pivot) <= tol
+%         % Try to select another random pivot, and see if we can really stop
+%         nsamples = 10;
+%         for j = 1 : nsamples
+%             ii = find_pivot(Afiber, [], n, 'random');
+%             ss = Afiber(1, ii); ss = ss(ii(1));
+%             if abs(s) > pivot
+%                 pivot = ss;
+%                 i = ii;
+%             end
+%         end
+%         
+%         if abs(pivot) <= tol
+%             return;
+%         end
+%     end
     
     % Select the next pivot. 
     U{1} = [ U{1} , fibers{1} ];

@@ -4,6 +4,7 @@ mu= 0.5;
 lambda = 1e-4;
 D85 = 2;
 D15 = 0.1;
+tol = 1e-8;
 
 % approximate deterministic distribution with CDF delta(t-D85)
 % as an Erlang with n_erlang_d85 states,
@@ -40,11 +41,35 @@ D85 = linspace(plow, pup, 100);
 r = [ones(nstates-ncycles,1);zeros(ncycles,1)];% Reliability at time t
 
 %% ACA related definitions
-Afiber = @(j,i) dot(r, KolmogorovODE(  Q( D15(i(2)), D85(i(3)) )  ), pi0, t ); % TODO fix this
+[rr,pp,kk] = rational(min(14, 5 + ceil(-log10(tol))), 1);
+QQ = @(t1, t2) infgen(nstates, ncycles, mu, lambda, t1, t2, n_erlang_d85, n_erlang_d15);
+Afiber = @(j,i) example_battery_two_params_fiber(j,i,t,D15, D85, pi0, QQ, r, rr, pp, kk);
 
 n = [ length(t), length(D15), length(D85) ];
 
-U = aca_nd(n, Afiber, 1e-6);
+U = aca_nd(n, Afiber, tol);
+
+% Construct the reference solution
+err = 0;
+RR = zeros(length(t), length(D15), length(D85));
+for i = 1 : length(D15)
+    for j = 1 : length(D85)
+        RR(:, i, j) = Afiber(1, [1, i, j]);
+        
+        % Construct the approximate sol
+        as = zeros(length(t), 1);
+        for k = 1 : length(t)
+            as(k) = 0;
+            for kk = 1 : size(U{1}, 2)
+                as(k) = as(k) + U{1}(k, kk) * U{2}(i, kk) * U{3}(j, kk);
+            end
+        end
+        
+        err = hypot(err, norm( RR(:, i, j) - as, 'fro' ) );
+    end
+end
+
+err / norm(RR(:))
 
 %% Infinitesimal Generator Matrix
 function Q = infgen(nstates, ncycles, mu, lambda, y1, y2, n_erlang_d85, n_erlang_d15)

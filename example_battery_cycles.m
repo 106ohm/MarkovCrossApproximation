@@ -41,15 +41,11 @@ r = [ones(nstates-ncycles,1);zeros(ncycles,1)];% Reliability at time t
 
 [rr,pp,kk] = rational(min(14, 5 + ceil(-log10(tol))), 1);
 
-% Determine the permutation of Q that we should use
-perm = amd(Q(D15(1)));
-iperm = perm; for j = 1 : length(perm); iperm(perm(j)) = j; end
-
 %% ACA related definitions
 % Aelem = @(i,j) dot(r, KolmogorovPoint(Q(D15(j)), pi0, t(i)));
-Aelem = @(i,j) dot(r, KolmogorovPoint2(Q(D15(j)), pi0, t(i), rr, pp, kk, perm, iperm));
+Aelem = @(i,j) dot(r, KolmogorovPoint2(Q(D15(j)), pi0, t(i), rr, pp, kk));
 Arowold  = @(i) arrayfun(@(j) Aelem(i, j), 1 : length(D15))';
-Arow = @(i) rowChebWrapper(@(t, x) dot(r, KolmogorovPoint2(Q(x), pi0, t, rr, pp, kk, perm, iperm)), t(i), D15)';
+Arow = @(i) rowChebWrapper(@(x) dot(r, KolmogorovPoint2(Q(x), pi0, t(i), rr, pp, kk)), D15)';
 Acol  = @(j) KolmogorovODE(Q(D15(j)), pi0, t) * r;
 
 timer = tic;
