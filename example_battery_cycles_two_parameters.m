@@ -1,10 +1,7 @@
 %% Model fixed parameters
-ncycles = 7;
-mu= 0.5; 
-lambda = 1e-4;
-D85 = 2;
-D15 = 0.1;
 tol = 1e-8;
+ncycles = 7; 
+lambda = 1e-4;
 
 % approximate deterministic distribution with CDF delta(t-D85)
 % as an Erlang with n_erlang_d85 states,
@@ -17,43 +14,45 @@ nstates = (ncycles-1)*(1+n_erlang_d85+n_erlang_d15+1)+1+1;
 pi0 = zeros(nstates,1);
 pi0(1) = 1;
 
-Q = @(y1,y2)infgen(nstates, ncycles, mu, lambda, y1, y2, n_erlang_d85, n_erlang_d15);
+% y1 is DischargeTime and y2 is mu
+Q = @(y1,y2)infgen(nstates, ncycles, lambda, y1, y2, n_erlang_d85, n_erlang_d15);
 
-%% Model variable parameters (time and D15)
+%% Model variable parameters (time, DischargeTime and mu)
 tf = 5.0;
-plow = 0.1;
-pup = 0.5;
+p1low = 1;
+p1up = 3;
+p2low = 0.3;
+p2up = 0.7;
+mu = p2low;
 
 t = linspace(0, tf, 100);
 
-D15 = plow;
-D85 = plow;
-% pi is a matrix whose rows are pi(t_i) for t_i in [0,tf]
-pi = KolmogorovODE(Q(D15, D85), pi0, t);
 
-D15 = linspace(plow, pup, 100);
-D85 = linspace(plow, pup, 100);
+% pi is a matrix whose rows are pi(t_i) for t_i in [0,tf]
+pi = KolmogorovODE(Q(DischargeTime, mu), pi0, t);
+
+DischargeTime = linspace(p1low, p1up, 100);
+mu = linspace(p2low, p2up, 100);
 
 %U = ChebopMarkovOneParameter(@Q,pi0,tf,plow,pup);
-
 
 %% Measure of interest
 r = [ones(nstates-ncycles,1);zeros(ncycles,1)];% Reliability at time t
 
 %% ACA related definitions
 [rr,pp,kk] = rational(min(14, 5 + ceil(-log10(tol))), 1);
-QQ = @(t1, t2) infgen(nstates, ncycles, mu, lambda, t1, t2, n_erlang_d85, n_erlang_d15);
-Afiber = @(j,i) example_battery_two_params_fiber(j,i,t,D15, D85, pi0, QQ, r, rr, pp, kk);
+QQ = @(t1, t2) infgen(nstates, ncycles, lambda, t1, t2, n_erlang_d85, n_erlang_d15);
+Afiber = @(j,i) example_battery_two_params_fiber(j,i,t,DischargeTime, mu, pi0, QQ, r, rr, pp, kk);
 
-n = [ length(t), length(D15), length(D85) ];
+n = [ length(t), length(DischargeTime), length(mu) ];
 
 U = aca_nd(n, Afiber, tol);
 
 % Construct the reference solution
 err = 0;
-RR = zeros(length(t), length(D15), length(D85));
-for i = 1 : length(D15)
-    for j = 1 : length(D85)
+RR = zeros(length(t), length(DischargeTime), length(mu));
+for i = 1 : length(DischargeTime)
+    for j = 1 : length(mu)
         RR(:, i, j) = Afiber(1, [1, i, j]);
         
         % Construct the approximate sol
@@ -72,8 +71,13 @@ end
 err / norm(RR(:))
 
 %% Infinitesimal Generator Matrix
-function Q = infgen(nstates, ncycles, mu, lambda, y1, y2, n_erlang_d85, n_erlang_d15)
+function Q = infgen(nstates, ncycles, lambda, y1, y2, n_erlang_d85, n_erlang_d15)
 % the last ncycles states are (absorbing) failure states
+
+% y1 is DischargeTime, y2 is mu
+D85 = 0.85*y1;
+D15 = 0.15*y1;
+mu = y2;
 
 % the states of each cycle (for cycle<ncycles) are indexed as follows:
 % 1 is C>15,
@@ -90,14 +94,14 @@ for cycle = 1 : ncycles-1
     Rcycle(1,base_index+2) = lambda;
     Rcycle(2,base_index+1) = mu;
     for i = 1 : n_erlang_d85
-        Rcycle(1+i,base_index+1+i+1) = n_erlang_d85/y2;
+        Rcycle(1+i,base_index+1+i+1) = n_erlang_d85/D85;
         Rcycle(1+i,base_index+1) = mu;
     end
     for i = 0 : n_erlang_d15-1
-        Rcycle(1+n_erlang_d85+i,base_index+1+n_erlang_d85+i+1) = n_erlang_d15/y1;
+        Rcycle(1+n_erlang_d85+i,base_index+1+n_erlang_d85+i+1) = n_erlang_d15/D15;
         Rcycle(1+n_erlang_d85+i,base_index+1+n_erlang_d85+n_erlang_d15+1) = mu;
     end
-    Rcycle(1+n_erlang_d85+n_erlang_d15,nstates-ncycles+cycle) = n_erlang_d15/y1;
+    Rcycle(1+n_erlang_d85+n_erlang_d15,nstates-ncycles+cycle) = n_erlang_d15/D15;
     R = [R; Rcycle];
 end
 R(end+1,end) = lambda;
