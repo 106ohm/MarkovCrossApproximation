@@ -25,13 +25,13 @@ tf = 5.0;
 plow = 0.01;
 pup = 0.5;
 
-t = linspace(0, tf, 6000);
+t = linspace(0, tf, 2000);
 
 DischargeTime = 0.1;
 % pi is a matrix whose rows are pi(t_i) for t_i in [0,tf]
 mpi = KolmogorovODE(Q(DischargeTime), pi0, t);
 
-nd = 6000;
+nd = 2000;
 DischargeTime = linspace(plow, pup, nd);
 
 %U = ChebopMarkovOneParameter(@Q,pi0,tf,plow,pup);
@@ -45,9 +45,9 @@ r = [ones(nstates-ncycles,1);zeros(ncycles,1)];% Reliability at time t
 %% ACA related definitions
 % Aelem = @(i,j) dot(r, KolmogorovPoint(Q(D15(j)), pi0, t(i)));
 Aelem = @(i,j) dot(r, KolmogorovPoint2(Q(DischargeTime(j)), pi0, t(i), rr, pp, kk));
-Arowold  = @(i) arrayfun(@(j) Aelem(i, j), 1 : length(D15))';
+Arowold  = @(i) arrayfun(@(j) Aelem(i, j), 1 : length(DischargeTime))';
 Arow = @(i) rowChebWrapper(@(x) dot(r, KolmogorovPoint2(Q(x), pi0, t(i), rr, pp, kk)), DischargeTime)';
-Acol  = @(j) KolmogorovODE(Q(D15(j)), pi0, t) * r;
+Acol  = @(j) KolmogorovODE(Q(DischargeTime(j)), pi0, t) * r;
 
 timer = tic;
 [U, V] = aca_2d(length(t), length(DischargeTime), Aelem, Arow, Acol, tol);

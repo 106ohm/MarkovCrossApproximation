@@ -1,5 +1,5 @@
-%% Model fixed parameters
-tol = 1e-8;
+hev %% Model fixed parameters
+tol = 1e-6;
 nreplicas = 5; 
 mu = 0.5;
 
@@ -15,15 +15,15 @@ Q = @(y1,y2)infgen(nreplicas, y1, y2, mu);
 tf = 5.0;
 p1low = 0.001;
 p1up = 0.01;
-lambda = p1low;
+% lambda = p1low;
 p2low = 0.9;
 p2up = 0.99;
-c = p2low;
+% c = p2low;
 
 t = linspace(0, tf, 100);
 
 % pi is a matrix whose rows are pi(t_i) for t_i in [0,tf]
-pi = KolmogorovODE(Q(lambda, c), pi0, t);
+% pi = KolmogorovODE(Q(lambda, c), pi0, t);
 
 lambda = linspace(p1low, p1up, 100);
 c = linspace(p2low, p2up, 100);
