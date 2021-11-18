@@ -1,4 +1,4 @@
-hev %% Model fixed parameters
+%% Model fixed parameters
 tol = 1e-6;
 nreplicas = 5; 
 mu = 0.5;
