@@ -1,4 +1,4 @@
-function v = example_battery_two_params_fiber(j, i, t, lambda1, lambda2, pi0, Q, r, rr, pp, kk)
+function v = example_coverage_two_params_fiber(j, i, t, lambda1, lambda2, pi0, Q, r, rr, pp, kk)
 
 switch j
     case 1
