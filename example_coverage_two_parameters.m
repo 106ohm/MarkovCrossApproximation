@@ -71,7 +71,7 @@ function Q = infgen(nreplicas, y1, y2, mu)
 % working replicas
 
 R = sparse(nreplicas+1,nreplicas+1);
-for i = nreplicas : 2
+for i = nreplicas : -1 : 2
     % i counts the number of working replicas
     R(nreplicas-i+1, nreplicas-i+2) = i*y1*y2;
     R(nreplicas-i+1,nreplicas+1) = i*y1*(1-y2);
