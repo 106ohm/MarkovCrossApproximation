@@ -1,6 +1,6 @@
 %% Model fixed parameters
 tol = 1e-6;
-nreplicas = 5; 
+nreplicas = 3; 
 mu = 0.5;
 
 nstates = nreplicas+1; % labelled as n, n-1,..., 1 and 0 (failed system state)
@@ -12,9 +12,9 @@ pi0(1) = 1;
 Q = @(y1,y2)infgen(nreplicas, y1, y2, mu);
 
 %% Model variable parameters (lambda and c)
-tf = 5.0;
-p1low = 0.001;
-p1up = 0.01;
+tf = 100.0;
+p1low = 1.e-6;
+p1up = 1.e-5;
 % lambda = p1low;
 p2low = 0.9;
 p2up = 0.99;

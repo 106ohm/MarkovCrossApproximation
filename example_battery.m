@@ -1,6 +1,6 @@
 %% Model fixed parameters
 tol = 1e-8;
-ncycles = 7; 
+ncycles = 2; 
 lambda = 1e-4;
 
 % approximate deterministic distribution with CDF delta(t-D85)
@@ -15,7 +15,7 @@ pi0 = zeros(nstates,1);
 pi0(1) = 1;
 
 % y1 is DischargeTime and y2 is mu
-Q = @(y1,y2)infgen(nstates, ncycles, lambda, y1, y2, n_erlang_d85, n_erlang_d15);
+Q = @(y1,y2) infgen(nstates, ncycles, lambda, y1, y2, n_erlang_d85, n_erlang_d15);
 
 %% Model variable parameters (time, DischargeTime and mu)
 tf = 5.0;
@@ -23,54 +23,42 @@ p1low = 1;
 p1up = 3;
 p2low = 0.3;
 p2up = 0.7;
-mu = p2low;
 
-t = linspace(0, tf, 400);
+nt = 100; np = 100;
 
+t = linspace(0, tf, nt);
 
-% pi is a matrix whose rows are pi(t_i) for t_i in [0,tf]
-% pi = KolmogorovODE(Q(DischargeTime(1), mu(1)), pi0, t);
+DischargeTime = linspace(p1low, p1up, np);
+mu = linspace(p2low, p2up, np);
 
-% DischargeTime = linspace(p1low, p1up, 400);
-% mu = linspace(p2low, p2up, 400);
-DischargeTime = chebpts(400, [p1low p1up]);
-mu = chebpts(400, [p2low p2up]);
-
-%U = ChebopMarkovOneParameter(@Q,pi0,tf,plow,pup);
-
-%% Measure of interest
-r = [ones(nstates-ncycles,1);zeros(ncycles,1)];% Reliability at time t
-
-%% ACA related definitions
-[rr,pp,kk] = rational(min(14, 5 + ceil(-log10(tol))), 1);
-QQ = @(t1, t2) infgen(nstates, ncycles, lambda, t1, t2, n_erlang_d85, n_erlang_d15);
-Afiber = @(j,i) example_battery_two_params_fiber(j,i,t,DischargeTime, mu, pi0, QQ, r, rr, pp, kk);
+kind = 'instantaneous';
+% kind = 'accumulated';
 
 n = [ length(t), length(DischargeTime), length(mu) ];
 
+% The infinitesimal generator as a function of the parameters \theta_1,
+% ..., \theta_p.
+Q = @(theta1, theta2) infgen(nstates, ncycles, lambda, theta1, theta2, n_erlang_d85, n_erlang_d15);
+r = [ones(nstates-ncycles,1);zeros(ncycles,1)]; % Reliability at time t
+
+% We create the function that evaluate a fiber of the tensor. 
+intervals = { t, DischargeTime, mu };
+Afiber = create_fiber_functions(Q, intervals, pi0, r, tol, kind);
+
+%% ACA
+timer_aca = tic;
 U = aca_nd(n, Afiber, tol);
+timer_aca = toc(timer_aca);
 
 % Construct the reference solution
-err = 0;
-RR = zeros(length(t), length(DischargeTime), length(mu));
-for i = 1 : length(DischargeTime)
-    for j = 1 : length(mu)
-        RR(:, i, j) = Afiber(1, [1, i, j]);
-        
-        % Construct the approximate sol
-        as = zeros(length(t), 1);
-        for k = 1 : length(t)
-            as(k) = 0;
-            for kk = 1 : size(U{1}, 2)
-                as(k) = as(k) + U{1}(k, kk) * U{2}(i, kk) * U{3}(j, kk);
-            end
-        end
-        
-        err = hypot(err, norm( RR(:, i, j) - as, 'fro' ) );
-    end
-end
+timer_reference = tic;
+[RR, err] = create_reference_approximation(Afiber, intervals, U);
+timer_reference = toc(timer_reference);
 
-err / norm(RR(:))
+fprintf('Time for ACA: %f seconds\n', timer_aca);
+fprintf('Time for explicit computation: %f seconds\n', timer_reference);
+fprintf('Acceleration factor: %2.3fx\n', timer_reference / timer_aca);
+fprintf('Relative error from the reference solution: %e\n', err);
 
 %% Infinitesimal Generator Matrix
 function Q = infgen(nstates, ncycles, lambda, y1, y2, n_erlang_d85, n_erlang_d15)
