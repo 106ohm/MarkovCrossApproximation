@@ -31,8 +31,10 @@ t = linspace(0, tf, 400);
 % pi is a matrix whose rows are pi(t_i) for t_i in [0,tf]
 % pi = KolmogorovODE(Q(DischargeTime(1), mu(1)), pi0, t);
 
-DischargeTime = linspace(p1low, p1up, 400);
-mu = linspace(p2low, p2up, 400);
+% DischargeTime = linspace(p1low, p1up, 400);
+% mu = linspace(p2low, p2up, 400);
+DischargeTime = chebpts(400, [p1low p1up]);
+mu = chebpts(400, [p2low p2up]);
 
 %U = ChebopMarkovOneParameter(@Q,pi0,tf,plow,pup);
 
