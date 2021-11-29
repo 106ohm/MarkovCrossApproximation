@@ -37,7 +37,7 @@ for s = 1 : maxit
          nsamples = 10;
          for j = 1 : nsamples
              ii = find_pivot(Afiber, [], n, 'random');
-             ss = Afiber(1, ii) - aca_eval_fiber(U, 1, i); ss = ss(ii(1));
+             ss = Afiber(1, ii) - aca_eval_fiber(U, 1, ii); ss = ss(ii(1));
              if abs(ss) > pivot
                  pivot = ss;
                  i = ii;
