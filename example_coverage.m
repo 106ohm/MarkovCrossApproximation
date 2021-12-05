@@ -88,12 +88,12 @@ fprintf('Relative error from the reference solution: %e\n', err);
 save('case1_energy_RR.mat', "RR");
 
 % plot Energy consumed at time tend
-tend = 10;
+tend = 20;
 Power = 10; %Watts
-grid(:,:)=Power*RR(tend,:,:);
+grid(:,:)=Power*RR(tend,:,:)/1000;
 imagesc(lambda,c,grid);
 colorbar;
-title('Expected energy consumed at $t_{\mathrm{end}}=10$ hours','interpreter','latex');
+title('Expected energy (kWh) consumed at $t_{\mathrm{end}}=2$ years','interpreter','latex');
 xlabel('$\lambda$','interpreter','latex'); 
 ylabel('c'); 
 
