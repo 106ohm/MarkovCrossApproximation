@@ -1,7 +1,7 @@
 %% Model fixed parameters
 tol = 1e-8;
-ncycles = 2; 
-lambda = 1e-4;
+ncycles = 3; 
+lambda = 1e-5;
 
 % approximate deterministic distribution with CDF delta(t-D85)
 % as an Erlang with n_erlang_d85 states,
@@ -14,15 +14,15 @@ nstates = (ncycles-1)*(1+n_erlang_d85+n_erlang_d15+1)+1+1;
 pi0 = zeros(nstates,1);
 pi0(1) = 1;
 
-% y1 is DischargeTime and y2 is mu
-Q = @(y1,y2) infgen(nstates, ncycles, lambda, y1, y2, n_erlang_d85, n_erlang_d15);
+% % y1 is DischargeTime and y2 is mu
+% Q = @(y1,y2) infgen(nstates, ncycles, lambda, y1, y2, n_erlang_d85, n_erlang_d15);
 
 %% Model variable parameters (time, DischargeTime and mu)
-tf = 5.0;
+tf = 24*365*10;
 p1low = 1;
 p1up = 3;
-p2low = 0.3;
-p2up = 0.7;
+p2low = 0.5;
+p2up = 2.5;
 
 nt = 100; np = 100;
 
@@ -31,34 +31,75 @@ t = linspace(0, tf, nt);
 DischargeTime = linspace(p1low, p1up, np);
 mu = linspace(p2low, p2up, np);
 
-kind = 'instantaneous';
-% kind = 'accumulated';
-
 n = [ length(t), length(DischargeTime), length(mu) ];
+intervals = { t, DischargeTime, mu };
+
+npar = prod(n);
 
 % The infinitesimal generator as a function of the parameters \theta_1,
 % ..., \theta_p.
 Q = @(theta1, theta2) infgen(nstates, ncycles, lambda, theta1, theta2, n_erlang_d85, n_erlang_d15);
-r = [ones(nstates-ncycles,1);zeros(ncycles,1)]; % Reliability at time t
+
+%% Reliability
+
+kind = 'instantaneous';
+r = [ones(nstates-ncycles,1);zeros(ncycles,1)];
 
 % We create the function that evaluate a fiber of the tensor. 
-intervals = { t, DischargeTime, mu };
 Afiber = create_fiber_functions(Q, intervals, pi0, r, tol, kind);
 
-%% ACA
+% ACA
 timer_aca = tic;
 U = aca_nd(n, Afiber, tol);
 timer_aca = toc(timer_aca);
 
-% Construct the reference solution
+% Reference solution
 timer_reference = tic;
 [RR, err] = create_reference_approximation(Afiber, intervals, U);
 timer_reference = toc(timer_reference);
+
+fprintf('Reliability, the full tensot has %d entries, the model has %d states\n', npar, nstates);
 
 fprintf('Time for ACA: %f seconds\n', timer_aca);
 fprintf('Time for explicit computation: %f seconds\n', timer_reference);
 fprintf('Acceleration factor: %2.3fx\n', timer_reference / timer_aca);
 fprintf('Relative error from the reference solution: %e\n', err);
+
+save('case2_reliability_RR.mat', "RR");
+
+% plot Reliability at time tend
+tend = 20;
+grid(:,:)=RR(tend,:,:);
+imagesc(DischargeTime, mu, grid);
+colorbar;
+title('Reliability at $t_{\mathrm{end}}=2$ years','interpreter','latex');
+xlabel('$L$','interpreter','latex'); 
+ylabel('$\mu$','interpreter','latex'); 
+
+
+% %% Reliability
+% 
+% kind = 'instantaneous';
+% % kind = 'accumulated';
+% r = [ones(nstates-ncycles,1);zeros(ncycles,1)]; % Reliability at time t
+% 
+% % We create the function that evaluate a fiber of the tensor. 
+% Afiber = create_fiber_functions(Q, intervals, pi0, r, tol, kind);
+% 
+% % ACA
+% timer_aca = tic;
+% U = aca_nd(n, Afiber, tol);
+% timer_aca = toc(timer_aca);
+% 
+% % Reference solution
+% timer_reference = tic;
+% [RR, err] = create_reference_approximation(Afiber, intervals, U);
+% timer_reference = toc(timer_reference);
+% 
+% fprintf('Time for ACA: %f seconds\n', timer_aca);
+% fprintf('Time for explicit computation: %f seconds\n', timer_reference);
+% fprintf('Acceleration factor: %2.3fx\n', timer_reference / timer_aca);
+% fprintf('Relative error from the reference solution: %e\n', err);
 
 %% Infinitesimal Generator Matrix
 function Q = infgen(nstates, ncycles, lambda, y1, y2, n_erlang_d85, n_erlang_d15)
