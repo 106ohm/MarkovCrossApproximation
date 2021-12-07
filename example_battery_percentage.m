@@ -1,13 +1,16 @@
+function [nstates, npar, timer_aca, timer_reference, err] = example_battery_percentage(tol, ncycles, n_erlang_d85, n_erlang_d15, nt, np)
+
+
 %% Model fixed parameters
-tol = 1e-6;
-ncycles = 2; 
+% tol = 1e-6;
+% ncycles = 2; 
 lambda = 1e-5;
 
 % approximate deterministic distribution with CDF delta(t-D85)
 % as an Erlang with n_erlang_d85 states,
 % and similarly for  the CDF delta(t-D15)
-n_erlang_d85 = 5;
-n_erlang_d15 = 3;
+% n_erlang_d85 = 5;
+% n_erlang_d15 = 3;
 
 nstates = (ncycles-1)*(1+n_erlang_d85+n_erlang_d15+1)+1+1;
 
@@ -24,7 +27,7 @@ p1up = 3;
 p2low = 0.5;
 p2up = 2.5;
 
-nt = 100; np = 100;
+% nt = 100; np = 100;
 
 t = linspace(0, tf, nt);
 
@@ -39,42 +42,6 @@ npar = prod(n);
 % The infinitesimal generator as a function of the parameters \theta_1,
 % ..., \theta_p.
 Q = @(theta1, theta2) infgen(nstates, ncycles, lambda, theta1, theta2, n_erlang_d85, n_erlang_d15);
-
-% %% Reliability
-% 
-% kind = 'instantaneous';
-% r = [ones(nstates-ncycles,1);zeros(ncycles,1)];
-% 
-% % We create the function that evaluate a fiber of the tensor. 
-% Afiber = create_fiber_functions(Q, intervals, pi0, r, tol, kind);
-% 
-% % ACA
-% timer_aca = tic;
-% U = aca_nd(n, Afiber, tol);
-% timer_aca = toc(timer_aca);
-% 
-% % Reference solution
-% timer_reference = tic;
-% [RR, err] = create_reference_approximation(Afiber, intervals, U);
-% timer_reference = toc(timer_reference);
-% 
-% fprintf('Reliability, the full tensot has %d entries, the model has %d states\n', npar, nstates);
-% 
-% fprintf('Time for ACA: %f seconds\n', timer_aca);
-% fprintf('Time for explicit computation: %f seconds\n', timer_reference);
-% fprintf('Acceleration factor: %2.3fx\n', timer_reference / timer_aca);
-% fprintf('Relative error from the reference solution: %e\n', err);
-% 
-% save('case2_reliability_RR_100.mat', "RR");
-% 
-% % plot Reliability at time tend
-% tend = 20;
-% grid(:,:)=RR(tend,:,:);
-% imagesc(DischargeTime, mu, grid);
-% colorbar;
-% title('Reliability at $t_{\mathrm{end}}=2$ years','interpreter','latex');
-% xlabel('$L$','interpreter','latex'); 
-% ylabel('$\mu$','interpreter','latex'); 
 
 %% Percentage in D<15
 
@@ -107,16 +74,20 @@ fprintf('Time for explicit computation: %f seconds\n', timer_reference);
 fprintf('Acceleration factor: %2.3fx\n', timer_reference / timer_aca);
 fprintf('Relative error from the reference solution: %e\n', err);
 
-save('case2_percentage_RR_100.mat', "RR");
+save(strcat('case2_percentage_RR_nstates_',int2str(nstates),'_nt_',int2str(nt),'_np_', int2str(np),'.mat'), "RR");
 
-% plot Percentage at time tend
-tend = 20;
+% plot Reliability at time tend
+tend = floor(nt/5);
 grid(:,:)=RR(tend,:,:);
+f = figure;
 imagesc(DischargeTime, mu, grid);
 colorbar;
 title('Percentage of time in 0<B$\le 15\%$ for $t_{\mathrm{end}}=2$ years','interpreter','latex');
 xlabel('$L$','interpreter','latex'); 
 ylabel('$\mu$','interpreter','latex'); 
+saveas(f,strcat('case2_percentage_nstates_',int2str(nstates),'_nt_',int2str(nt),'_np_', int2str(np),'.png'));
+
+end
 
 %% Infinitesimal Generator Matrix
 function Q = infgen(nstates, ncycles, lambda, y1, y2, n_erlang_d85, n_erlang_d15)
