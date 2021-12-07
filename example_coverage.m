@@ -27,44 +27,46 @@ intervals = { t, lambda, c };
 
 npar = prod(n);
 
-%% Reliability at time t
-kind = 'instantaneous';
-r = [ones(nreplicas,1);0];
-
-Afiber = create_fiber_functions(Q, intervals, pi0, r, tol, kind);
-
-% ACA
-timer_aca = tic;
-U = aca_nd(n, Afiber, tol);
-timer_aca = toc(timer_aca);
-
-% Reference solution
-timer_reference = tic;
-[RR, err] = create_reference_approximation(Afiber, intervals, U);
-timer_reference = toc(timer_reference);
-
-fprintf('Reliability, the full tensot has %d entries\n', npar);
-
-fprintf('Time for ACA: %f seconds\n', timer_aca);
-fprintf('Time for explicit computation: %f seconds\n', timer_reference);
-fprintf('Acceleration factor: %2.3fx\n', timer_reference / timer_aca);
-fprintf('Relative error from the reference solution: %e\n', err);
-
-save('case1_reliability_RR.mat', "RR");
-
-% plot Reliability at time tend
-tend = 20;
-grid(:,:)=RR(tend,:,:);
-imagesc(lambda,c,grid);
-colorbar;
-title('Reliability at $t_{\mathrm{end}}=2$ years','interpreter','latex');
-xlabel('$\lambda$','interpreter','latex'); 
-ylabel('c'); 
+% %% Reliability at time t
+% kind = 'instantaneous';
+% r = [ones(nreplicas,1);0];
+% 
+% Afiber = create_fiber_functions(Q, intervals, pi0, r, tol, kind);
+% 
+% % ACA
+% timer_aca = tic;
+% U = aca_nd(n, Afiber, tol);
+% timer_aca = toc(timer_aca);
+% 
+% % Reference solution
+% timer_reference = tic;
+% [RR, err] = create_reference_approximation(Afiber, intervals, U);
+% timer_reference = toc(timer_reference);
+% 
+% fprintf('Reliability, the full tensot has %d entries\n', npar);
+% 
+% fprintf('Time for ACA: %f seconds\n', timer_aca);
+% fprintf('Time for explicit computation: %f seconds\n', timer_reference);
+% fprintf('Acceleration factor: %2.3fx\n', timer_reference / timer_aca);
+% fprintf('Relative error from the reference solution: %e\n', err);
+% 
+% save('case1_reliability_RR.mat', "RR");
+% 
+% % plot Reliability at time tend
+% tend = 20;
+% grid(:,:)=RR(tend,:,:);
+% imagesc(lambda,c,grid);
+% colorbar;
+% title('Reliability at $t_{\mathrm{end}}=2$ years','interpreter','latex');
+% xlabel('$\lambda$','interpreter','latex'); 
+% ylabel('c'); 
 
 %% Energy consumption
 
 kind = 'accumulated';
-r = linspace(nreplicas,0,nreplicas+1)';
+%r = zeros(nreplicas+1,1); r(1)=1;
+r = ones(nreplicas+1,1);
+r(1)=0; r(nreplicas+1)=0;
  
 Afiber = create_fiber_functions(Q, intervals, pi0, r, tol, kind);
 
@@ -78,24 +80,59 @@ timer_reference = tic;
 [RR, err] = create_reference_approximation(Afiber, intervals, U);
 timer_reference = toc(timer_reference);
 
-fprintf('Energy consumption, the full tensot has %d entries\n', npar);
+fprintf('Expected time not in nr, the full tensot has %d entries\n', npar);
 
 fprintf('Time for ACA: %f seconds\n', timer_aca);
 fprintf('Time for explicit computation: %f seconds\n', timer_reference);
 fprintf('Acceleration factor: %2.3fx\n', timer_reference / timer_aca);
 fprintf('Relative error from the reference solution: %e\n', err);
 
-save('case1_energy_RR.mat', "RR");
+save('case1_time__not_nr_RR.mat', "RR");
 
-% plot Energy consumed at time tend
+% plot 
 tend = 20;
-Power = 10; %Watts
-grid(:,:)=Power*RR(tend,:,:)/1000;
+grid(:,:)=RR(tend,:,:);
 imagesc(lambda,c,grid);
 colorbar;
-title('Expected energy (kWh) consumed at $t_{\mathrm{end}}=2$ years','interpreter','latex');
+title('Expected time in $n_r-1,\dots,1$ with $t_{\mathrm{end}}=2$ years','interpreter','latex');
 xlabel('$\lambda$','interpreter','latex'); 
 ylabel('c'); 
+
+% %% Energy consumption
+% 
+% kind = 'accumulated';
+% r = linspace(nreplicas,0,nreplicas+1)';
+%  
+% Afiber = create_fiber_functions(Q, intervals, pi0, r, tol, kind);
+% 
+% % ACA
+% timer_aca = tic;
+% U = aca_nd(n, Afiber, tol);
+% timer_aca = toc(timer_aca);
+% 
+% % Reference solution
+% timer_reference = tic;
+% [RR, err] = create_reference_approximation(Afiber, intervals, U);
+% timer_reference = toc(timer_reference);
+% 
+% fprintf('Energy consumption, the full tensot has %d entries\n', npar);
+% 
+% fprintf('Time for ACA: %f seconds\n', timer_aca);
+% fprintf('Time for explicit computation: %f seconds\n', timer_reference);
+% fprintf('Acceleration factor: %2.3fx\n', timer_reference / timer_aca);
+% fprintf('Relative error from the reference solution: %e\n', err);
+% 
+% save('case1_energy_RR.mat', "RR");
+% 
+% % plot Energy consumed at time tend
+% tend = 20;
+% Power = 10; %Watts
+% grid(:,:)=Power*RR(tend,:,:)/1000;
+% imagesc(lambda,c,grid);
+% colorbar;
+% title('Expected energy (kWh) consumed at $t_{\mathrm{end}}=2$ years','interpreter','latex');
+% xlabel('$\lambda$','interpreter','latex'); 
+% ylabel('c'); 
 
 %% Infinitesimal Generator Matrix
 function Q = infgen(nreplicas, y1, y2, mu)
