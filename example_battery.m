@@ -24,7 +24,7 @@ p1up = 3;
 p2low = 0.5;
 p2up = 2.5;
 
-nt = 100; np = 100;
+nt = 10; np = 10;
 
 t = linspace(0, tf, nt);
 
