@@ -14,7 +14,7 @@ end
 
 res = inf;
 
-while res > eps * length(x)
+while res > 100 * eps * length(x)
     n = 2 * n - 1;
     
     % Evaluate the function at the new points

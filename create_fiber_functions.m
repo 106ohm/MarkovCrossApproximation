@@ -29,11 +29,7 @@ if j == 1
             v = w * r;
         case 'mediated'
             w = KolmogorovIntegralODE(Q(args{:}), pi0, t);
-            if t>tol
-                v = (w * r)/t;
-            else
-                v = tol;
-            end
+            v = (w * r) ./ t(:); v(1) = 0;
     end
     
 else
@@ -54,13 +50,14 @@ else
                 Q(args{1:j-2}, x, args{j:end}), pi0, t(i(1)), rr, pp, kk)), ...
                 theta{j-1})';
         case 'mediated'
-            if t(i(1))>tol
+            if t(i(1)) ~= 0
                 v = rowChebWrapper(@(x) dot(r, KolmogorovIntegralPoint(...
-                    Q(args{1:j-2}, x, args{j:end}), pi0, t(i(1)), rr, pp, kk))/t(i(1)), ...
-                    theta{j-1})';
+                    Q(args{1:j-2}, x, args{j:end}), pi0, t(i(1)), rr, pp, kk)), ...
+                    theta{j-1})' / t(i(1));
             else
-                v = tol;
+                v = zeros(1, length(theta{j-1}));
             end
+            
     end
 end
 
