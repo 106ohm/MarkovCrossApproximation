@@ -32,7 +32,7 @@ if j == 1
             if t>tol
                 v = (w * r)/t;
             else
-                v = 0;
+                v = tol;
             end
     end
     
@@ -59,7 +59,7 @@ else
                     Q(args{1:j-2}, x, args{j:end}), pi0, t(i(1)), rr, pp, kk))/t(i(1)), ...
                     theta{j-1})';
             else
-                v = 0;
+                v = tol;
             end
     end
 end
