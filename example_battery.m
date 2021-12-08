@@ -1,5 +1,5 @@
 %% Model fixed parameters
-tol = 1e-6;
+tol = 1e-3;
 ncycles = 2; 
 lambda = 1e-5;
 
@@ -120,7 +120,7 @@ Q = @(theta1, theta2) infgen(nstates, ncycles, lambda, theta1, theta2, n_erlang_
 
 %% Time in D<15
 
-kind = 'accumulated';
+kind = 'mediated';
 r = zeros(nstates,1);
 for cycle = 1 : ncycles-1
     base_index = (cycle-1)*(1+n_erlang_d85+n_erlang_d15+1);

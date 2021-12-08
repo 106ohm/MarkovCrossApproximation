@@ -22,6 +22,8 @@ i = find_pivot(Afiber, i, n, strategy);
 
 maxit = 100;
 
+nrmest = 0.0;
+
 for s = 1 : maxit
     
     for j = 1 : d
@@ -29,12 +31,15 @@ for s = 1 : maxit
     end
     
     pivot = fibers{1}(i(1));
+    nrmest = max(nrmest, abs(pivot));
     
     fprintf('Step %d, |pivot| = %e\n', s, abs(pivot));
     
-     if abs(pivot) <= tol
+     if abs(pivot) <= tol * nrmest
+         fprintf('Preliminary stopping condition satisfied, checking if we can stop\n');
+         
          % Try to select another random pivot, and see if we can really stop
-         nsamples = 10;
+         nsamples = 4;
          for j = 1 : nsamples
              ii = find_pivot(Afiber, [], n, 'random');
              ss = Afiber(1, ii) - aca_eval_fiber(U, 1, ii); ss = ss(ii(1));
@@ -44,7 +49,8 @@ for s = 1 : maxit
              end
          end
          
-         if abs(pivot) <= sqrt(max(n)) * tol
+         if abs(pivot) <= sqrt(max(n)) * tol * nrmest
+             fprintf('Stopping criterion satisfied, returning a rank %d approximation\n', size(U{1}, 2));
              return;
          end
      end
