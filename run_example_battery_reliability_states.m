@@ -2,7 +2,7 @@ tol=1.e-6;
 n_erlang_d85=10;
 n_erlang_d15=5;
 nt=10;
-np=100;
+np=20;
 
 for ncycles = 2 : 2 : 20 
     fprintf('RUN: ncycles=%d\n', ncycles);
