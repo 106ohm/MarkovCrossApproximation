@@ -1,4 +1,4 @@
-function Afiber = create_fiber_functions(Q, intervals, pi0, r, tol, kind)
+function [Afiber, Aelem] = create_fiber_functions(Q, intervals, pi0, r, tol, kind)
 %CREATE_FIBER_FUNCTIONS
 
 t = intervals{1};
@@ -6,7 +6,31 @@ t = intervals{1};
 [rr,pp,kk] = rational(min(14, 5 + ceil(-log10(tol))), 1);
 
 Afiber = @(j,i) fiber_evaluator(j, i, t, intervals(2:end), pi0, Q, r, rr, pp, kk, kind, tol);
+Aelem = @(i) point_evaluator(i, t, intervals(2:end), pi0, Q, r, rr, pp, kk, kind, tol);
 
+end
+
+function v = point_evaluator(i, t, theta, pi0, Q, r, rr, pp, kk, kind, tol)
+% We note that the parameter with index j is actually args{j-1},
+    % because we have removed the time. 
+    args = num2cell(arrayfun(@(j) theta{j}(i(j+1)), 1 : length(theta)));
+    
+    switch kind
+        case 'instantaneous'
+            v = dot(r, KolmogorovPoint(...
+                    Q(args{:}), pi0, t(i(1)), rr, pp, kk));
+        case 'accumulated'
+            v = dot(r, KolmogorovIntegralPoint(...
+                Q(args{:}), pi0, t(i(1)), rr, pp, kk));
+        case 'mediated'
+            if t(i(1)) ~= 0
+                v = dot(r, KolmogorovIntegralPoint(...
+                        Q(args{:}), pi0, t(i(1)), rr, pp, kk)) / t(i(1));
+            else
+                v = 0;
+            end
+            
+    end
 end
 
 function v = fiber_evaluator(j, i, t, theta, pi0, Q, r, rr, pp, kk, kind, tol)

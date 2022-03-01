@@ -1,6 +1,6 @@
 %% Model fixed parameters
 tol = 1e-6;
-nreplicas = 3; 
+nreplicas = 2;
 mu = 0.5;
 
 nstates = nreplicas+1; % labelled as n, n-1,..., 1 and 0 (failed system state)
@@ -18,9 +18,10 @@ p1up = 1.e-5;
 p2low = 0.9;
 p2up = 0.99;
 
-t = linspace(0, tf, 100);
-lambda = linspace(p1low, p1up, 100);
-c = linspace(p2low, p2up, 100);
+npoints = 30;
+t = linspace(0, tf, npoints);
+lambda = linspace(p1low, p1up, npoints);
+c = linspace(p2low, p2up, npoints);
 
 n = [ length(t), length(lambda), length(c) ];
 intervals = { t, lambda, c };
@@ -31,7 +32,7 @@ npar = prod(n);
 kind = 'instantaneous';
 r = [ones(nreplicas,1);0];
 
-Afiber = create_fiber_functions(Q, intervals, pi0, r, tol, kind);
+[Afiber, Aelem] = create_fiber_functions(Q, intervals, pi0, r, tol, kind);
 
 % ACA
 timer_aca = tic;
@@ -43,7 +44,7 @@ timer_reference = tic;
 [RR, err] = create_reference_approximation(Afiber, intervals, U);
 timer_reference = toc(timer_reference);
 
-fprintf('Reliability, the full tensot has %d entries\n', npar);
+fprintf('Reliability, the full tensor has %d entries\n', npar);
 
 fprintf('Time for ACA: %f seconds\n', timer_aca);
 fprintf('Time for explicit computation: %f seconds\n', timer_reference);
@@ -52,14 +53,41 @@ fprintf('Relative error from the reference solution: %e\n', err);
 
 save('case1_reliability_RR.mat', "RR");
 
+% Use the GLM
+tGLM = tic;
+npoints_glm = 500;
+X = zeros(npoints_glm, 3);
+y = zeros(npoints_glm, 1);
+f1 = @(x) x; f2 = @(x) x / min(abs(lambda)); f3 = @(x) x;
+for i = 1 : npoints_glm
+    X(i, :) = randi(npoints, 1, 3);
+    y(i) = Aelem(X(i,:));
+    X(i, :) = [ f1(t(X(i,1))), f2(lambda(X(i,2))), f3(c(X(i,3))) ];
+end
+
+mdl = fitglm(X, y, 'poly233', 'Distribution', 'Gamma'); tGLM = toc(tGLM);
+%plot(feval(mdl, X(:,1), X(:,2), X(:,3)), 'r-');
+%hold on; plot(y, 'b-');
+
+[xx,yy,zz] = ndgrid(1:length(t), 1:length(lambda), 1:length(c));
+y = feval(mdl, f1(t(xx)), f2(lambda(yy)), f3(c(zz)));
+
+errGLM = norm(RR(:) - y(:));
+fprintf('errGLM = %e (time = %f)\n', errGLM / norm(RR(:)), tGLM);
+
+norm(RR(:) - mean(RR(:))) / norm(RR(:))
+
 % plot Reliability at time tend
-tend = 20;
+tend = round(npoints/5);
+grid = zeros(npoints, npoints);
 grid(:,:)=RR(tend,:,:);
 imagesc(lambda,c,grid);
 colorbar;
 title('Reliability at $t_{\mathrm{end}}=2$ years','interpreter','latex');
 xlabel('$\lambda$','interpreter','latex'); 
 ylabel('c'); 
+
+return;
 
 %% Energy consumption
 
