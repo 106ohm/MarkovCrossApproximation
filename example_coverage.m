@@ -18,7 +18,7 @@ p1up = 1.e-5;
 p2low = 0.9;
 p2up = 0.99;
 
-npoints = 100;
+npoints = 20;
 t = linspace(0, tf, npoints);
 lambda = linspace(p1low, p1up, npoints);
 c = linspace(p2low, p2up, npoints);
@@ -55,7 +55,7 @@ save('case1_reliability_RR.mat', "RR");
 
 % Use the GLM
 tGLM = tic;
-npoints_glm = 500;
+npoints_glm = 100;
 X = zeros(npoints_glm, 3);
 y = zeros(npoints_glm, 1);
 f1 = @(x) x; f2 = @(x) x / min(abs(lambda)); f3 = @(x) x;
@@ -65,7 +65,8 @@ for i = 1 : npoints_glm
     X(i, :) = [ f1(t(X(i,1))), f2(lambda(X(i,2))), f3(c(X(i,3))) ];
 end
 
-mdl = fitglm(X, y, 'poly233', 'Distribution', 'Gamma'); tGLM = toc(tGLM);
+mdl = fitglm(X, y, 'Distribution', 'Gamma'); tGLM = toc(tGLM);
+% mdl = fitglm(X, y, 'poly233', 'Distribution', 'Gamma'); tGLM = toc(tGLM);
 %plot(feval(mdl, X(:,1), X(:,2), X(:,3)), 'r-');
 %hold on; plot(y, 'b-');
 
@@ -76,6 +77,8 @@ errGLM = norm(RR(:) - y(:));
 fprintf('errGLM = %e (time = %f)\n', errGLM / norm(RR(:)), tGLM);
 
 norm(RR(:) - mean(RR(:))) / norm(RR(:))
+
+keyboard
 
 % plot Reliability at time tend
 tend = round(npoints/5);
