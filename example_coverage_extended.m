@@ -11,7 +11,7 @@ pi0(1) = 1;
 
 % theta1 is lambda (i.e., failure rate) and theta2 is c1 (i.e., failure coverage)
 % theta3 is c2 (i.e., recovery coverage)
-Q = @(theta1,theta2,theta3)infgen(nreplicas, theta1, theta2, mu1, theta3, mu2);
+Q = @(theta1,theta2,theta3)infgen(nreplicas, theta1, theta2, theta3, mu1, mu2);
 
 %% Model variable parameters (lambda, c1 and c2)
 tf = 24*365*10;
@@ -22,7 +22,7 @@ p2up = 0.99;
 p3low = 0.9;
 p3up = 0.99;
 
-npoints = 4;
+npoints = 10;
 t = linspace(0, tf, npoints);
 lambda = linspace(p1low, p1up, npoints);
 c1 = linspace(p2low, p2up, npoints);
@@ -95,7 +95,7 @@ function Q = infgen(nreplicas, lambda, c1, c2, mu1, mu2)
 % and the last is system failure state
 
 R = sparse(nreplicas+2,nreplicas+2);
-for i = nreplicas : -1 : 3
+for i = nreplicas : -1 : 2
     % i counts the number of working replicas
     R(nreplicas-i+1, nreplicas-i+2) = i*lambda*c1;
     R(nreplicas-i+1,nreplicas+2) = i*lambda*(1-c1);

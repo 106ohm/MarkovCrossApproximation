@@ -78,8 +78,6 @@ fprintf('errGLM = %e (time = %f)\n', errGLM / norm(RR(:)), tGLM);
 
 norm(RR(:) - mean(RR(:))) / norm(RR(:))
 
-keyboard
-
 % plot Reliability at time tend
 tend = round(npoints/5);
 grid = zeros(npoints, npoints);

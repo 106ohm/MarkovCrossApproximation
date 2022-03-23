@@ -8,7 +8,7 @@ function [RR, err] = create_reference_approximation(Afiber, intervals, U)
     for i = 1 : length(indices)
         indices{i} = 1 : length(intervals{i+1});
     end
-    [indices{:}] = ndgrid(indices{2:end});
+    [indices{:}] = ndgrid(indices{1:end});
     
     for i = 1 : numel(indices{1})
         v = cellfun(@(x) x(i), indices);
