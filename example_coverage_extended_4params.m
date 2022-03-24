@@ -2,16 +2,15 @@
 tol = 1e-6;
 nreplicas = 2;
 mu1 = 0.5;
-mu2 = 0.5;
 
 nstates = nreplicas+2; % labelled as n, n-1,..., 1, asked_rejuvenation and 0 (failed system state)
 
 pi0 = zeros(nstates,1);
 pi0(1) = 1;
 
-% theta1 is lambda (i.e., failure rate) and theta2 is c1 (i.e., failure coverage)
-% theta3 is c2 (i.e., recovery coverage)
-Q = @(theta1,theta2,theta3)infgen(nreplicas, theta1, theta2, theta3, mu1, mu2);
+% theta1 is lambda (i.e., failure rate), theta2 is c1 (i.e., failure coverage)
+% theta3 is c2 (i.e., recovery coverage) and theta4 is mu2 (i.e., recovery rate)
+Q = @(theta1,theta2,theta3,theta4)infgen(nreplicas, theta1, theta2, theta3, mu1, theta4);
 
 %% Model variable parameters (lambda, c1 and c2)
 tf = 24*365*10;
@@ -21,15 +20,18 @@ p2low = 0.9;
 p2up = 0.99;
 p3low = 0.9;
 p3up = 0.99;
+p4low = 0.25;
+p4up = 0.75;
 
-npoints = 32;
+npoints = 16;
 t = linspace(0, tf, npoints);
 lambda = linspace(p1low, p1up, npoints);
 c1 = linspace(p2low, p2up, npoints);
 c2 = linspace(p3low, p3up, npoints);
+mu2 = linspace(p4low, p4up, npoints);
 
-n = [ length(t), length(lambda), length(c1), length(c2) ];
-intervals = { t, lambda, c1, c2 };
+n = [ length(t), length(lambda), length(c1), length(c2), length(mu2) ];
+intervals = { t, lambda, c1, c2, mu2 };
 
 npar = prod(n);
 
