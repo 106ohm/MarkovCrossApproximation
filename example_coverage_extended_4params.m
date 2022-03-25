@@ -3,7 +3,7 @@ tol = 1e-6;
 nreplicas = 2;
 mu1 = 0.5;
 
-nstates = nreplicas+2; % labelled as n, n-1,..., 1, asked_rejuvenation and 0 (failed system state)
+nstates = nreplicas+2; % labelled as n, n-1,..., 1, standby and 0 (failed system state)
 
 pi0 = zeros(nstates,1);
 pi0(1) = 1;
@@ -91,26 +91,24 @@ save('case1_extended_reliability_RR.mat', "RR");
 %% Infinitesimal Generator Matrix
 function Q = infgen(nreplicas, lambda, c1, c2, mu1, mu2)
 % the working states are "nreplicas", "nreplicas-1", ..., 1,
-% the last two states are (absorbing):
-% the last minus one is almost system failure (where the system has
+% the last minus one is a standby state (where the system has
 % the last change to recover),
-% and the last is system failure state
+% and the last state (absorbing) is system failure state
 
 R = sparse(nreplicas+2,nreplicas+2);
 for i = nreplicas : -1 : 2
     % i counts the number of working replicas
     R(nreplicas-i+1, nreplicas-i+2) = i*lambda*c1;
-    R(nreplicas-i+1,nreplicas+2) = i*lambda*(1-c1);
+    R(nreplicas-i+1,nreplicas+1) = i*lambda*(1-c1);
     if i<nreplicas
-        R(nreplicas-i+1,nreplicas-i) = mu1*c2;
-        R(nreplicas-i+1,nreplicas+1) = mu1*(1-c2);
+        R(nreplicas-i+1,nreplicas-i) = mu1;
     end
 end
-R(nreplicas, nreplicas+2) = lambda;
+R(nreplicas, nreplicas+1) = lambda;
 R(nreplicas, nreplicas-1) = mu1;
 
-R(nreplicas+1,1) = mu2;% rejuvenation
-R(nreplicas+1,nreplicas+2) = lambda;
+R(nreplicas+1,1) = c2*mu2;% rejuvenation
+R(nreplicas+1,nreplicas+2) = (1-c2)*mu2;
 
 Q = (R-diag(R*ones(nreplicas+2,1)));
 end
