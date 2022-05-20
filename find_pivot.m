@@ -11,13 +11,14 @@ switch strategy
         
     case 'fiber'
         i(d) = randi(n(d), 1, 1);
-        rounds = 1;
+        rounds = 2;
         for s = 1 : rounds
             for j = 1 : d
                 f = Afiber(j, i);
                 [~, i(j)] = max(abs(f));
             end
         end
+
         
     otherwise
         error('Unsupported selection strategy');

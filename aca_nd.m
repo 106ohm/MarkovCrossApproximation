@@ -20,7 +20,7 @@ end
 i = ones(1, d);
 i = find_pivot(Afiber, i, n, strategy);
 
-maxit = 100;
+maxit = 1000;
 
 for s = 1 : maxit
     

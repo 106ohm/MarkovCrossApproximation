@@ -1,6 +1,14 @@
 function row = rowChebWrapper(f, pts)
 %
 
+if length(pts) <= 1000
+    row = pts;
+    for j = 1 : length(pts)
+        row(j) = f(pts(j));
+    end
+    return;
+end
+
 n = 15;
 a = min(pts);
 b = max(pts);
